@@ -1,7 +1,7 @@
 {
   "name": "vue-helper",
   "displayName": "vue-helper",
-  "version": "4.1.0",
+  "version": "4.2.3",
   "description": "vue enhance, extension for Element-UI, Element Plus, Ant Desigin Vue",
   "keywords": [
     "vue-helper",
@@ -13,7 +13,7 @@
     "vscode"
   ],
   "icon": "asset/logo.png",
-  "publisher": "shenjiaolong",
+  "publisher": "arming",
   "author": "shenjiaolong",
   "homepage": "http://vue-helper.80fight.cn/",
   "license": "MIT",
@@ -32,10 +32,11 @@
   },
   "gitHead": "b1cc40df44b9cd73ba96d8b7f0369cc3ce690c45",
   "scripts": {
+    "compile": "tsc -p ./tsconfig.build.json",
     "dev": "concurrently \"npm:dev-tsc\" \"npm:dev-build\"",
     "dev-tsc": "tsc -b tsconfig.build.json -w",
     "dev-build": "node scripts/build -- --watch",
-    "build": "node scripts/build -- --minify",
+    "build": "npm run compile && node scripts/build -- --minify",
     "release": "npm run build && npm run publish",
     "publish": "vsce package",
     "test": "echo \"Error: run tests from root\" && exit 1"
@@ -240,6 +241,7 @@
   },
   "dependencies": {
     "@vscode/l10n": "^0.0.18",
-    "glob": "^10.3.12"
+    "glob": "^10.3.12",
+    "param-case": "^4.0.0"
   }
 }

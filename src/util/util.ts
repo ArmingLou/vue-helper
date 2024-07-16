@@ -1,5 +1,5 @@
 import { workspace, TextDocument, Position } from 'vscode'
-import * as os from 'os'
+// import * as os from 'os'
 import * as path from 'path'
 
 // windows根路径处理
@@ -7,8 +7,13 @@ export function winRootPathHandle(pagePath: string) {
   if (!pagePath) {
     return ''
   }
-  if (os.platform().includes("win") && pagePath.length > 0 && (pagePath[0] === "\\" || pagePath[0] === "/")) {
-    return pagePath.substr(1, pagePath.length);
+  // if (os.platform().includes("win") && pagePath.length > 0 && (pagePath[0] === "\\" || pagePath[0] === "/")) {
+  //   return pagePath.substr(1, pagePath.length);
+  // } else {
+  //   return pagePath;
+  // }
+  if (pagePath.length > 0 && (pagePath[0] !== "\\" && pagePath[0] !== "/")) {
+    return pagePath = "/" + pagePath
   } else {
     return pagePath;
   }
