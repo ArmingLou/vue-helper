@@ -1,6 +1,9 @@
-import { CancellationToken, CompletionContext, CompletionItem, CompletionItemProvider, CompletionList, Position, ProviderResult, TextDocument, 
-  languages, workspace, Range, window, Selection, CompletionItemKind, SnippetString, 
-  l10n, HoverProvider, Hover, TextLine, DefinitionProvider, Definition, Uri, Location } from "vscode";
+import {
+  CancellationToken, CompletionContext, CompletionItem, CompletionItemProvider, CompletionList, Position, ProviderResult, TextDocument,
+  languages, workspace, Range, window, Selection, CompletionItemKind, SnippetString,
+  l10n, HoverProvider, Hover, TextLine, DefinitionProvider, Definition, Uri, Location
+} from "vscode";
+// import * as vscode from 'vscode'
 import ExplorerProvider from './explorer'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -29,7 +32,7 @@ export default class FrameworkProvider {
     this.init()
     this.explorer.addInit(this)
   }
-  
+
   init() {
     try {
       if (this.explorer.projectRootPath) {
@@ -75,11 +78,11 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
 
   isCloseTag(document: TextDocument, position: Position) {
     let txt = document.getText(new Range(new Position(position.line, 0), position)).trim();
-    if(!txt.endsWith('>') || /.*=("[^"]*>|'[^']*>)$/gi.test(txt) || txt.endsWith('/>')) {
+    if (!txt.endsWith('>') || /.*=("[^"]*>|'[^']*>)$/gi.test(txt) || txt.endsWith('/>')) {
       return false;
     }
     let txtArr = txt.match(/<([\w-]+)(\s*|(\s+[\w-_:@\.]+(=("[^"]*"|'[^']*'))?)+)\s*>/gim);
-    if(Array.isArray(txtArr) && txtArr.length > 0) {
+    if (Array.isArray(txtArr) && txtArr.length > 0) {
       let txtStr = txtArr[txtArr.length - 1];
       return /<([\w-]+)(\s*|(\s+[\w-_:@\.]+(=("[^"]*"|'[^']*'))?)+)\s*>$/gi.test(txtStr);
     }
@@ -91,7 +94,7 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
     let txtInfo = document.lineAt(position.line);
     let txtArr = txtInfo.text.match(/<([\w-]+)(\s*|(\s+[\w-_:@\.]+(=("[^"]*"|'[^']*'))?)+)\s*>/gim);
     let tag = 'div';
-    if(txtArr) {
+    if (txtArr) {
       tag = txtArr[txtArr.length - 1].replace(/<([\w-]+)(\s*|(\s+[\w-_:@\.]+(=("[^"]*"|'[^']*'))?)+)\s*>/gim, '$1');
     }
     let exclude = ['br', 'img'];
@@ -140,8 +143,8 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
       }
       tag = this.matchTag(this.tagReg, txt, line, document, position);
 
-      if (tag === 'break') {return;}
-      if (tag) {return <TagObject>tag;}
+      if (tag === 'break') { return; }
+      if (tag) { return <TagObject>tag; }
       line--;
     }
     return;
@@ -184,8 +187,8 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
     return attrValues
   }
 
-   // 属性值建议值
-   getAttrValueSuggestion(tag: string, attr: string): CompletionItem[] {
+  // 属性值建议值
+  getAttrValueSuggestion(tag: string, attr: string): CompletionItem[] {
     let suggestions: CompletionItem[] = [];
     const values = this.getAttrValues(tag, attr);
     values.forEach((value: string) => {
@@ -295,7 +298,7 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
           docText = docText.substr(braceBeforeIndex + 1, docText.length);
         }
         let propText = '';
-        while(propStack > 0 && docText.length > 0) {
+        while (propStack > 0 && docText.length > 0) {
           braceBeforeIndex = docText.indexOf('{');
           braceAfterIndex = docText.indexOf('}');
           if (braceBeforeIndex === -1) {
@@ -397,8 +400,8 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
     return false;
   }
 
-   // 编译建议标签
-   buildTagSuggestion(tag: string, tagVal: any, id: number): CompletionItem {
+  // 编译建议标签
+  buildTagSuggestion(tag: string, tagVal: any, id: number): CompletionItem {
     return {
       label: tag,
       sortText: `00${id}${tag}`,
@@ -468,7 +471,7 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
     }
     return suggestions
   }
-  
+
 
   // 标签提示项
   getTagSuggestion() {
@@ -561,7 +564,7 @@ class FrameworkCompletionItemProvider implements CompletionItemProvider {
     } else if (!tag && hasSquareQuote) {
       return this.notInTemplate(document, position) ? [] : this.getElementTagLabelSuggestion()
     }
-    
+
     return []
   }
 
@@ -582,18 +585,18 @@ class FrameworkHoverProvider implements HoverProvider {
     let line = position.line;
     let tagName = '';
 
-    while(line > 0 && !tagName) {
+    while (line > 0 && !tagName) {
       let lineInfo: TextLine = document.lineAt(line);
       let text = lineInfo.text.trim();
       // 本行则获取光标位置前文本
-      if(line === position.line) {
+      if (line === position.line) {
         text = text.substring(0, position.character);
       }
       let txtArr = text.match(/<[^(>/)]+/gim);
-      if(txtArr) {
+      if (txtArr) {
         for (let i = (txtArr.length - 1); i >= 0; i--) {
-          if(txtArr[i][0] === '<' && txtArr[i][1] !== '/') {
-            if(txtArr[i].indexOf(' ') !== -1) {
+          if (txtArr[i][0] === '<' && txtArr[i][1] !== '/') {
+            if (txtArr[i].indexOf(' ') !== -1) {
               tagName = txtArr[i].replace(/^<(\S*)(\s.*|\s*)/gi, '$1');
             } else {
               tagName = txtArr[i].replace(/^<(.*)/gi, '$1');
@@ -610,7 +613,7 @@ class FrameworkHoverProvider implements HoverProvider {
     let word = getWord(document, position, [' ', '<', '>', '"', '\'', '.', '\\', "=", ":"])
 
     // tag标签遍历
-    if(this.document[word.selectText]) {
+    if (this.document[word.selectText]) {
       return new Hover(this.document[word.selectText]);
     }
 
@@ -652,7 +655,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
    */
   getDefinitionPosition(lineText: string) {
     const pathRegs = [
-      /import\s+.*\s+from\s+['"](.*)['"]/,
+      /\s+from\s+['"](.*)['"]/,
       /import\s*[^'"]*\(['"](.*)['"]\)[^'"]*/,
       /.*require\s*\([^'"]*['"](.*)['"][^'"]*\)/,
       /import\s+['"](.*)['"]/,
@@ -683,7 +686,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
         let p: any = {}
         try {
           p = JSON.parse(data)
-        } catch(_e) {
+        } catch (_e) {
         }
         if (Array.isArray(plugin)) {
           let framework = plugin
@@ -697,11 +700,11 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
           let pluginArr = plugin.split('/')
           if (pluginArr.length === 1 && (p.dependencies && p.dependencies[plugin]) || (p.devDependencies && p.devDependencies[plugin])) {
             ret = plugin
-          } else if (pluginArr.length > 1 &&  (p.dependencies && p.dependencies[pluginArr[0]]) || (p.devDependencies && p.devDependencies[pluginArr[0]])) {
+          } else if (pluginArr.length > 1 && (p.dependencies && p.dependencies[pluginArr[0]]) || (p.devDependencies && p.devDependencies[pluginArr[0]])) {
             ret = plugin
           }
         }
-        
+
         if (ret) {
           resolve(ret)
         } else {
@@ -711,7 +714,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
     })
   }
 
-  async readDir(dir:string, selectText: string, frame: string) {
+  async readDir(dir: string, selectText: string, frame: string) {
     return await new Promise((resolve, reject) => {
       fs.readdir(dir, 'utf8', (err, files) => {
         if (err) reject(err)
@@ -769,14 +772,14 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
    * 获取node_modules下package.json文件中的main字段
    * @param path 
    */
-  async getMain(rootPath:string) {
+  async getMain(rootPath: string) {
     return await new Promise((resolve, reject) => {
       fs.readFile(rootPath + 'package.json', 'utf8', (err, data) => {
         if (err) reject(err)
         let p: any = {}
         try {
           p = JSON.parse(data)
-        } catch(_e) {
+        } catch (_e) {
         }
         if (p.main) {
           resolve(p.main)
@@ -805,7 +808,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
       isAbsolute = true
     }
     filePath = filePath.replace(this.frameworkProvider.explorer.prefix.alias, this.frameworkProvider.explorer.prefix.path)
-    
+
     // 文件存在后缀，则直接查找
     if (/(.*\/.*|[^.]+)\..*$/gi.test(filePath)) {
       let tempFile = ''
@@ -825,7 +828,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
         // 相对路径处理
         let tempFile = ''
         if (isAbsolute) {
-          tempFile = path.join(this.frameworkProvider.explorer.projectRootPath, filePath) 
+          tempFile = path.join(this.frameworkProvider.explorer.projectRootPath, filePath)
         } else {
           tempFile = path.join(document.uri.path || '', '../', filePath)
         }
@@ -842,7 +845,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
             return Promise.resolve(new Location(Uri.file(tempFile), new Position(0, 0)))
           }
           // index文件判断
-          if(fs.existsSync(indexFile)) {
+          if (fs.existsSync(indexFile)) {
             return Promise.resolve(new Location(Uri.file(indexFile), new Position(0, 0)))
           }
         }
@@ -864,6 +867,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
       return Promise.resolve(new Location(Uri.file(pluginRootPath + main), new Position(0, 0)))
     }
 
+    // vscode.window.showErrorMessage(`Can't find ${filePath}`)
     return Promise.resolve(null)
   }
 
@@ -885,11 +889,11 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
     if (word.startText === '<') {
       searchType = 'components'
     }
-    while(pos < document.lineCount && !/^\s*<\/script>\s*$/g.test(lineText)) {
+    while (pos < document.lineCount && !/^\s*<\/script>\s*$/g.test(lineText)) {
       lineText = document.lineAt(++pos).text
       // 从script标签开始查找
-      if(!begin) {
-        if(/^\s*<script.*>\s*$/g.test(lineText)) {
+      if (!begin) {
+        if (/^\s*<script.*>\s*$/g.test(lineText)) {
           begin = true
         }
         continue;
@@ -897,7 +901,7 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
       // 判断现在正在对哪个属性进行遍历
       let keyWord = lineText.replace(/\s*(\w*)\s*(\(\s*\)|:|(:\s*function\s*\(\s*\)))\s*{\s*/gi, '$1')
       // braceLeftCount <= 3 用于去除data属性中包含vue其他属性从而不能定义问题
-      if(this.VUE_ATTR[keyWord] !== undefined && braceLeftCount === 0) {
+      if (this.VUE_ATTR[keyWord] !== undefined && braceLeftCount === 0) {
         attr = keyWord
         braceLeftCount = 0
       }
@@ -934,17 +938,23 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
         // data属性匹配, data具有return，单独处理
         let braceLeftList = lineText.match(/{/gi)
         let braceRightList = lineText.match(/}/gi)
-        if(attr === 'data' && braceLeftCount >= 2) {
+        if (attr === 'data' && braceLeftCount >= 2) {
           let matchName = lineText.replace(/\s*(\w+):.+/gi, '$1')
-          if(word.selectText === matchName && braceLeftCount === 2) {
+          if (word.selectText === matchName && braceLeftCount === 2) {
+            if (pos === position.line) {
+              return Promise.resolve(null);
+            }
             return Promise.resolve(new Location(document.uri, new Position(pos, lineText.indexOf(matchName) + matchName.length)))
           }
           let braceLeft = braceLeftList ? braceLeftList.length : 0
           let braceRight = braceRightList ? braceRightList.length : 0
           braceLeftCount += braceLeft - braceRight
-        } else if(attr) {
+        } else if (attr) {
           let matchName = lineText.replace(/\s*(async\s*)?(\w*)\s*(:|\().*/gi, '$2')
-          if(word.selectText === matchName && braceLeftCount === 1) {
+          if (word.selectText === matchName && braceLeftCount === 1) {
+            if (pos === position.line) {
+              return Promise.resolve(null);
+            }
             return Promise.resolve(new Location(document.uri, new Position(pos, lineText.indexOf(matchName) + matchName.length)))
           }
           let braceLeft = braceLeftList ? braceLeftList.length : 0
@@ -953,24 +963,62 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
         }
 
         // data取return的属性值
-        if(attr === 'data') {
-          if(/\s*return\s*{\s*/gi.test(lineText)) {
+        if (attr === 'data') {
+          if (/\s*return\s*{\s*/gi.test(lineText)) {
             braceLeftCount = 2
           }
         }
       }
     }
 
+    // 样式跳转
+    if (word.startText === '"') {
+      const rec = new RegExp('\\s*\\.' + word.selectText + '(\\s+\\.[^\\/\\s\\.\\{]+)*\\s*\\{', 'g');
+      let ll = 0
+      let start = false;
+      let lineText2 = ''
+      while (ll < document.lineCount && !/^\s*<\/style>\s*$/g.test(lineText2)) {
+        lineText2 = document.lineAt(++ll).text
+        if (!start && /^\s*<style(\s+[^\/\s>]+)*\s*>\s*$/g.test(lineText2)) {
+          start = true;
+        }
+        if (start && rec.test(lineText2)) {
+          return Promise.resolve(new Location(document.uri, new Position(ll, lineText2.indexOf(word.selectText) + word.selectText.length)))
+        }
+
+      }
+    }
+
     // 全目录搜索看是否存在改文件
-    let files = glob.sync(workspace.rootPath + '/!(node_modules)/**/*.vue')
-    for (let i = 0; i < files.length; i++) {
-      const vueFile = files[i];
+    let files1 = glob.sync(workspace.rootPath + '/!(node_modules)/**/*.vue')
+    for (let i = 0; i < files1.length; i++) {
+      const vueFile = files1[i];
       let vueChangeFile = vueFile.replace(/-/gi, '').toLowerCase().replace(/\.vue$/, '')
       if (vueChangeFile.endsWith('/' + word.selectText.toLowerCase().replace(/-/gi, ''))) {
         return Promise.resolve(new Location(Uri.file(vueFile), new Position(0, 0)))
       }
     }
-   
+    let files2 = glob.sync(workspace.rootPath + '/!(node_modules)/**/*.js')
+    // vscode.window.showInformationMessage(`vue-helper: 全目录搜索${word.selectText}|${word.startText},${files2.length}个文件,${files2[0]}`)
+    //初始化一个正则表达式对象
+    const rec = new RegExp('\\s+' + word.selectText + '\\([^\\/]*\\{', 'g');
+    const rec1 = new RegExp('\\s+' + word.selectText + ':\\s*function\\(', 'g');
+    const rec2 = new RegExp('\\s+' + word.selectText + '\\s*=\\s*\\(', 'g');
+
+    for (let i = 0; i < files2.length; i++) {
+      const vueFile = files2[i];
+      const content = fs.readFileSync(vueFile, 'utf8');
+      const lines = content.split('\n');
+      let lineC = 0;
+      for (const line of lines) {
+        if(rec.test(line)||rec1.test(line)||rec2.test(line)) {
+            return Promise.resolve(new Location(Uri.file(vueFile), new Position(lineC, 0)))
+        }
+        lineC++;
+      }
+    }
+
+    // vscode.window.showInformationMessage('vue-helper: 该文件暂不支持跳转')
     return Promise.resolve(null);
   }
 
@@ -982,12 +1030,15 @@ export class vueHelperDefinitionProvider implements DefinitionProvider {
     // // 判断是文件内跳转还是文件外跳转
     let file = this.getDefinitionPosition(line.text)
     if (file) {
+      // vscode.window.showInformationMessage('vue-helper: 文件内跳转')
       return this.definitionOutFile(document, file)
     } else {
       if (!(docText.includes('lang="ts"') || this.frameworkProvider.explorer.isTs)) {
+        // vscode.window.showInformationMessage('vue-helper: 文件内')
         return this.definitionInFile(document, position)
       }
     }
+    // vscode.window.showInformationMessage('vue-helper: 该文件暂不支持跳转2')
     return []
   }
 }
